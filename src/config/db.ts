@@ -1,19 +1,20 @@
-import mysql from 'mysql2';
+import { Sequelize } from "sequelize";
 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'react%123',
-    database: process.env.DB_NAME || 'surat_penawaran_db',
-});
-
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        process.exit(1);
-    } else {
-        console.log('Connected to MySQL database!');
+// Configure Sequelize connection
+const db = new Sequelize(
+    process.env.DB_NAME || "surat_penawaran_db", // Database name
+    process.env.DB_USER || "root",              // Username
+    process.env.DB_PASSWORD || "react%123",     // Password
+    {
+        host: process.env.DB_HOST || "localhost", // Host
+        dialect: "mysql",                         // Database dialect
+        logging: false,                           // Disable SQL logging
     }
-});
+);
 
-export default connection;
+// Test the connection
+db.authenticate()
+    .then(() => console.log("Connected to the database successfully!"))
+    .catch((err) => console.error("Unable to connect to the database:", err));
+
+export default db;

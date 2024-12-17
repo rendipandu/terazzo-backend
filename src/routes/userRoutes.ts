@@ -1,72 +1,29 @@
-import { Router, Request, Response } from 'express';
-import connection from '../config/db';
-import mysql from 'mysql2/promise'; // Untuk koneksi MySQL dengan Promises
-import { authenticateToken } from '../middleware/authMiddleware';
+import express from "express";
+import {
+    getUsers,
+    getUserById,
+    createUser,
+    updateUser,
+    deleteUser,
+} from "../controller/Users";
+import { authenticateToken } from "../middleware/authMiddleware"; // Add role-based access control if needed
 
-const router = Router();
+const router = express.Router();
 
-// Create User
-router.post('/', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-    const { username, email, password, roleId } = req.body;
+// Get all users
+router.get("/", authenticateToken, getUsers);
 
-    if (!username || !email || !password || !roleId) {
-        res.status(400).json({ message: 'All fields are required' });
-        return;
-    }
+// Get a single user by UUID
+router.get("/:uuid", authenticateToken, getUserById);
 
-    try {
-        const query = `INSERT INTO users (username, email, password, roleId) VALUES (?, ?, ?, ?)`;
-        const [result] = await connection.promise().query<mysql.OkPacket>(query, [
-            username,
-            email,
-            password,
-            roleId,
-        ]);
-        res.status(201).json({ message: 'User created successfully', userId: result.insertId });
-    } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+// Create a new user
+// router.post("/", authenticateToken, createUser);
+router.post("/", createUser);
 
-// Read All Users
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
-    try {
-        const [users] = await connection.promise().query(`SELECT * FROM users`);
-        res.json(users);
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+// Update an existing user
+router.put("/:uuid", authenticateToken, updateUser);
 
-// Update User
-router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { username, email, password, roleId } = req.body;
-
-    try {
-        const query = `UPDATE users SET username = ?, email = ?, password = ?, roleId = ? WHERE id = ?`;
-        await connection.promise().query(query, [username, email, password, roleId, id]);
-        res.json({ message: 'User updated successfully' });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Delete User
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const query = `DELETE FROM users WHERE id = ?`;
-        await connection.promise().query(query, [id]);
-        res.json({ message: 'User deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+// Delete a user
+router.delete("/:uuid", authenticateToken, deleteUser);
 
 export default router;

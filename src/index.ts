@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
-import roleRoutes from './routes/roleRoutes';
+// import roleRoutes from './routes/roleRoutes';
 
 dotenv.config();
 
@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
-app.use('/role', roleRoutes);
+// app.use('/role', roleRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
